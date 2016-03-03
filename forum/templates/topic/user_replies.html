@@ -1,0 +1,72 @@
+{% extends 'snippet/layout.html' %}
+{% load forum_extras %}
+
+{% block stylesheet %}
+    <link rel="stylesheet" href="/static/css/codehilite.css" />
+{% endblock %}
+
+{% block main %}
+    <div class="replies-lists container-box user-replies">
+        <div class="ui-header">
+            <span class="bread-nav">F2E › {{ user_info.username }} › 回复列表</span>
+        </div>
+
+        <div class="ui-content">
+            {% for reply in replies %}
+                <div class="reply-item">
+                    <div class="main">
+                        <span class="title">
+                            回复了 {{ reply.topic.author.username }} 创建的主题 <a href="/t/{{ reply.topic.id }}/">{{ reply.topic.title }}</a>
+                        </span>
+                        <div class="content">
+                            {{ reply.content|markdown|content_process|safe }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% ifequal reply_page.total 0 %}
+                <div class="pl10 pr10">
+                    <div class="alert mt20 no-replies">
+                        该用户暂时还没有回复过主题。
+                    </div>
+                </div>
+            {% endifequal %}
+        </div>
+
+        <div class="ui-footer">
+            {% if reply_page.pages > 1 %}
+            <div class="pagination">
+                {% pagination reply_page request.get_full_path %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+    <div class="usercard container-box">
+        <div class="ui-header">
+            <a href="/u/{{ user_info.username }}/">
+                <img src="/static/avatar/m_{% if user_info.avatar %}{{ user_info.avatar }}{% else %}default.png{% endif %}?t={% gen_random %}" alt="" class="avatar" />
+            </a>
+            <div class="username">{{ user_info.username }}</div>
+            <div class="website"><a href="{% if user_info.website %}{{ user_info.website }}{% endif %}">{% if user_info.website %}{{ user_info.website }}{% endif %}</a></div>
+        </div>
+        <div class="ui-content">
+            <div class="status status-topic">
+                <strong><a href="/u/{{ user_info.username }}/topics/">{{ counter.topics }}</a></strong> 主题
+            </div>
+            <div class="status status-reply">
+                <strong><a href="/u/{{ user_info.username }}/replies/">{{ counter.replies }}</a></strong> 回复
+            </div>
+            <div class="status status-favorite">
+                <strong><a href="/u/{{ user_info.username }}/favorites/">{{ counter.favorites }}</a></strong> 收藏
+            </div>
+            <div class="status status-reputation">
+                <strong>{% if user_info.reputation %}{{ user_info.reputation }}{% else %}0{% endif %}</strong> 威望
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

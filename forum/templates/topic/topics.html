@@ -1,0 +1,205 @@
+{% extends 'snippet/layout.html' %}
+{% load forum_extras %}
+
+{% block main %}
+    {% comment %}
+    <ul class="news container-box">
+        <li><a href="#">HTML5(目前)无法帮你实现的五件事</a></li>
+        <li><a href="#">DNS优化的原理和方法</a></li>
+        <li><a href="#">浅谈互联网产品前期设计方法</a></li>
+        <li><a href="#">如何在Google成为优秀的产品经理?</a></li>
+        <li><a href="#">页面前端的水有多深？</a></li>
+        <li><a href="#">如何利用互联网工具调研网站</a></li>
+    </ul>
+    {% endcomment %}
+
+    <div class="topics container-box deprecated-mt10">
+        <div class="ui-header">
+            <div class="dropdown fr">
+                <a class="btn btn-small" type="button" href="###" data-toggle="dropdown">创建新主题</a>
+                <ul class="dropdown-menu" role="menu">
+                    <li role="presentation">
+                        {% for node in hot_nodes %}
+                        <a role="menuitem" href="/t/create/{{ node.slug }}/">{{ node.name }}</a>
+                        {% endfor %}
+                    </li>
+                </ul>
+            </div>
+            <span class="bread-nav">
+                {# 在这里写你自己写推荐的node,或者其它链接,参考F2E.im #}
+                <a class="node-link" href="/node/share/">分享</a>
+            </span>
+        </div>
+        {% for topic in topics %}
+            <div class="topic-item">
+                <a href="/u/{{ topic.author.username }}/">
+                    <img src="/static/avatar/m_{% if topic.author.avatar %}{{ topic.author.avatar }}{% else %}default.png{% endif %}" alt="" class="avatar" />
+                </a>
+                <div class="main">
+                    <h3 class="title">
+                        <a href="/t/{{ topic.id }}/">{{ topic.title }}</a>
+                    </h3>
+                    <div class="meta">
+                        <span class="node"><a href="/node/{{ topic.node.slug }}/">{{ topic.node.name }}</a></span> •
+                        <span class="username">
+                            <a href="/u/{% if topic.author.username %}{{ topic.author.username }}{% else %}{{ topic.author.id }}{% endif %}/">{{ topic.author.username }}</a>
+                        </span> •
+                        {% if topic.last_replied_time %}
+                            <span class="last-touched">{{ topic.last_touched|pretty_date }}</span> •
+                            <span class="last-reply-username">最后回复来自
+                                <a href="/u/{% if topic.last_replied_by.username %}{{ topic.last_replied_by.username }}{% else %}{{ topic.last_replied_by.id }}{% endif %}/">
+                                    <strong>{{ topic.last_replied_by.username }}</strong>
+                                </a>
+                            </span>
+                        {% else %}
+                            <span class="last-touched">{{ topic.last_touched|pretty_date }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if topic.reply_count %}
+                    <div class="count">
+                        <a href="/t/{{ topic.id }}/#reply{% if topic.reply_count %}{{ topic.reply_count }}{% else %}0{% endif %}">{% if topic.reply_count %}{{ topic.reply_count }}{% else %}0{% endif %}</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        {% if topic_page.pages > 1 %}
+        <div class="pagination">
+            {% pagination topic_page request.get_full_path %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="nodes-cloud container-box mt10">
+        <h4 class="title">
+            <span class="octicon octicon-globe"></span>
+            常见节点导航
+        </h4>
+        <ul>
+            {% for plane in planes %}
+                <li>
+                    <label for="">{{ plane.name }}</label>
+                    <span class="nodes">
+                        {% for node in plane.node_set.all %}
+                            <a href="/node/{{ node.slug }}/">{{ node.name }}</a>
+                        {% endfor %}
+                    </span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+    {% if user.is_authenticated %}
+        <div class="usercard container-box">
+            <div class="ui-header">
+                <a href="/u/{{ user.username }}/">
+                    <img src="/static/avatar/m_{% if user.avatar %}{{ user.avatar }}{% else %}default.png{% endif %}?t={% gen_random %}" alt="" class="avatar" />
+                </a>
+                <div class="username">{{ user.username }}</div>
+                <div class="website"><a href="{% if user.website %}{{ user.website }}{% endif %}">{% if user.website %}{{ user.website }}{% endif %}</a></div>
+            </div>
+            <div class="ui-content">
+                <div class="status status-topic">
+                    <strong><a href="/u/{{ user.username }}/topics/">{{ counter.topics }}</a></strong> 主题
+                </div>
+                <div class="status status-reply">
+                    <strong><a href="/u/{{ user.username }}/replies/">{{ counter.replies }}</a></strong> 回复
+                </div>
+                <div class="status status-favorite">
+                    <strong><a href="/u/{{ user.username }}/favorites/">{{ counter.favorites }}</a></strong> 收藏
+                </div>
+                <div class="status status-reputation">
+                    <strong>{% if user.reputation %}{{ user.reputation }}{% else %}0{% endif %}</strong> 威望
+                </div>
+            </div>
+        </div>
+        {% comment %}
+        {% if user.counter.notifications %}
+            <div class="alert mt10 mb10">
+                <span>
+                    <a href="/notifications/">{% if user.nickname %}{{ user.nickname }}{% else %}{{ user.nickname }}{% endif %}，你有{{ user.counter.notifications }}条未读提醒，去看看吧</a>
+                </span>
+            </div>
+        {% endif %}
+        {% endcomment %}
+    {% else %}
+        <div class="login-box container-box">
+            <div class="ui-content tc">
+                <a class="btn btn-small mr10" type="button" href="/login/">登录</a>
+                <a class="btn btn-small mr10" type="button" href="/register/">注册</a>
+                <a class="btn btn-small" type="button" href="/forgot/">找回密码</a>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="sidebox container-box mt10 weixin">
+        <div class="ui-header">
+            <span class="title">微信公共帐号</span>
+        </div>
+        <div class="ui-content">
+            <img src="/static/images/qrcode_for_gh_81ac76ebf8e3_258.jpg" alt="" />
+        </div>
+    </div>
+
+    <div class="sidebox container-box mt10 hot-nodes">
+        <div class="ui-header">
+            <span class="title">最热节点</span>
+        </div>
+        <div class="ui-content">
+            {% for node in hot_nodes %}
+                <a href="/node/{{ node.slug }}/">{{ node.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="sidebox container-box mt10 friends">
+        <div class="ui-header">
+            <span class="title">友情社区</span>
+        </div>
+        <div class="ui-content">
+            <p><a href="http://python-china.org"><img src="/static/images/python_china_logo.jpg" alt="" /></a></p>
+            <p><a href="http://ruby-china.org"><img src="/static/images/ruby_china_logo.png" alt="" /></a></p>
+            <p><a href="http://trans4fun.org"><img src="/static/images/trans4fun.png" alt="" /></a></p>
+            <p><a href="http://www.ubuntusoft.com"><img src="/static/images/ubuntusoft.png" alt="" style="width:190px;" /></a></p>
+        </div>
+    </div>
+
+    {% comment %}
+    <div class="sidebox container-box mt10 friends">
+        <div class="ui-header">
+            <span class="title">我们的标志</span>
+        </div>
+        <div class="ui-content">
+            <p><a href="http://f2e.im"><img src="/static/images/f2e.im.logo.png" alt="" /></a></p>
+        </div>
+    </div>
+    {% endcomment %}
+
+    <div class="sidebox container-box mt10 community-status">
+        <div class="ui-header">
+            <span class="title">运行状态</span>
+        </div>
+        <div class="ui-content">
+            <dl>
+                <dt>注册成员</dt>
+                <dd>{{ status_counter.users }}</dd>
+            </dl>
+            <dl>
+                <dt>节点</dt>
+                <dd>{{ status_counter.nodes }}</dd>
+            </dl>
+            <dl>
+                <dt>主题</dt>
+                <dd>{{ status_counter.topics }}</dd>
+            </dl>
+            <dl>
+                <dt>回复</dt>
+                <dd>{{ status_counter.replies }}</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}

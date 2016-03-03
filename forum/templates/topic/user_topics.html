@@ -1,0 +1,89 @@
+{% extends 'snippet/layout.html' %}
+{% load forum_extras %}
+
+{% block main %}
+    <div class="topics container-box user-topics">
+        <div class="ui-header">
+            <span class="bread-nav">F2E › {{ user_info.username }} › 主题列表</span>
+        </div>
+
+        <div class="ui-content">
+            {% for topic in topics %}
+                <div class="topic-item">
+                    <a href="/u/{{ topic.author.username }}/">
+                        <img src="/static/avatar/m_{% if topic.author.avatar %}{{ topic.author.avatar }}{% else %}default.png{% endif %}" alt="" class="avatar" />
+                    </a>
+                    <div class="main">
+                        <h3 class="title">
+                            <a href="/t/{{ topic.id }}/">{{ topic.title }}</a>
+                        </h3>
+                        <div class="meta">
+                            <span class="node"><a href="/node/{{ topic.node.slug }}/">{{ topic.node.name }}</a></span> •
+                            <span class="username">
+                                <a href="/u/{% if topic.author.username %}{{ topic.author.username }}{% else %}{{ topic.author.id }}{% endif %}/">{{ topic.author.username }}</a>
+                            </span> •
+                            {% if topic.last_replied_time %}
+                                <span class="last-touched">{{ topic.last_touched|pretty_date }}</span> •
+                                <span class="last-reply-username">最后回复来自
+                                    <a href="/u/{% if topic.last_replied_by.username %}{{ topic.last_replied_by.username }}{% else %}{{ topic.last_replied_by.id }}{% endif %}/">
+                                        <strong>{{ topic.last_replied_by.username }}</strong>
+                                    </a>
+                                </span>
+                            {% else %}
+                                <span class="last-touched">{{ topic.last_touched|pretty_date }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if topic.reply_count %}
+                        <div class="count">
+                            <a href="/t/{{ topic.id }}/#reply{% if topic.reply_count %}{{ topic.reply_count }}{% else %}0{% endif %}">{% if topic.reply_count %}{{ topic.reply_count }}{% else %}0{% endif %}</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            {% ifequal topic_page.total 0 %}
+                <div class="pl10 pr10">
+                    <div class="alert mt20 no-topics">
+                        该用户暂时还没有发表过主题。
+                    </div>
+                </div>
+            {% endifequal %}
+        </div>
+
+        <div class="ui-footer">
+        {% if topic_page.pages > 1 %}
+            <div class="pagination">
+                {% pagination topic_page request.get_full_path %}
+            </div>
+        {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+    <div class="usercard container-box">
+        <div class="ui-header">
+            <a href="/u/{{ user_info.username }}/">
+                <img src="/static/avatar/m_{% if user_info.avatar %}{{ user_info.avatar }}{% else %}default.png{% endif %}?t={% gen_random %}" alt="" class="avatar" />
+            </a>
+            <div class="username">{{ user_info.username }}</div>
+            <div class="website"><a href="{% if user_info.website %}{{ user_info.website }}{% endif %}">{% if user_info.website %}{{ user_info.website }}{% endif %}</a></div>
+        </div>
+        <div class="ui-content">
+            <div class="status status-topic">
+                <strong><a href="/u/{{ user_info.username }}/topics/">{{ counter.topics }}</a></strong> 主题
+            </div>
+            <div class="status status-reply">
+                <strong><a href="/u/{{ user_info.username }}/replies/">{{ counter.replies }}</a></strong> 回复
+            </div>
+            <div class="status status-favorite">
+                <strong><a href="/u/{{ user_info.username }}/favorites/">{{ counter.favorites }}</a></strong> 收藏
+            </div>
+            <div class="status status-reputation">
+                <strong>{% if user_info.reputation %}{{ user_info.reputation }}{% else %}0{% endif %}</strong> 威望
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

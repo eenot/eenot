@@ -1,0 +1,80 @@
+{% extends 'snippet/layout.html' %}
+{% load forum_extras %}
+
+{% block title %}
+    社区成员 - F2E
+{% endblock %}
+
+{% block main %}
+    <div class="member-lists container-box">
+        <div class="ui-header">
+            <span class="title">社区活跃成员</span>
+        </div>
+        <div class="ui-content">
+            {% for member in active_members %}
+                <div class="member">
+                    <a href="/u/{{ member.username }}/">
+                        <img src="/static/avatar/m_{% if member.avatar %}{{ member.avatar }}{% else %}default.png{% endif %}" alt="" class="avatar" />
+                    </a>
+                    <span class="username">
+                        <a href="/u/{{ member.username }}/">{{ member.username }}</a>
+                    </span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="member-lists container-box mt10">
+        <div class="ui-header">
+            <span class="title">最新加入成员</span>
+        </div>
+        <div class="ui-content">
+            {% for member in members %}
+                <div class="member">
+                    <a href="/u/{{ member.username }}/">
+                        <img src="/static/avatar/m_{% if member.avatar %}{{ member.avatar }}{% else %}default.png{% endif %}" alt="" class="avatar" />
+                    </a>
+                    <span class="username">
+                        <a href="/u/{{ member.username }}/">{{ member.username }}</a>
+                    </span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+    {% if user.is_authenticated %}
+        <div class="usercard container-box">
+            <div class="ui-header">
+                <a href="/u/{{ user.username }}/">
+                    <img src="/static/avatar/m_{% if user.avatar %}{{ user.avatar }}{% else %}default.png{% endif %}?t={% gen_random %}" alt="" class="avatar" />
+                </a>
+                <div class="username">{{ user.username }}</div>
+                <div class="website"><a href="{% if user.website %}{{ user.website }}{% endif %}">{% if user.website %}{{ user.website }}{% endif %}</a></div>
+            </div>
+            <div class="ui-content">
+                <div class="status status-topic">
+                    <strong><a href="/u/{{ user.username }}/topics/">{{ counter.topics }}</a></strong> 主题
+                </div>
+                <div class="status status-reply">
+                    <strong><a href="/u/{{ user.username }}/replies/">{{ counter.replies }}</a></strong> 回复
+                </div>
+                <div class="status status-favorite">
+                    <strong><a href="/u/{{ user.username }}/favorites/">{{ counter.favorites }}</a></strong> 收藏
+                </div>
+                <div class="status status-reputation">
+                    <strong>{% if user.reputation %}{{ user.reputation }}{% else %}0{% endif %}</strong> 威望
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="login-box container-box">
+            <div class="ui-content tc">
+                <a class="btn btn-small mr10" type="button" href="/login/?next={{ request.get_full_path }}">登录</a>
+                <a class="btn btn-small mr10" type="button" href="/register/">注册</a>
+                <a class="btn btn-small" type="button" href="/forgot/">找回密码</a>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
